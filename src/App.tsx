@@ -23,6 +23,10 @@ export default function App() {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
         const parsed: BirthdayConfig = JSON.parse(saved);
+        // If stored config still has generic name, upgrade to Alice's default
+        if (!parsed.personName || parsed.personName === 'Festeggiato/a') {
+          return DEFAULT_CONFIG;
+        }
         // Clean out old fake sample messages if present
         const fakeIds = new Set(['m1', 'm2', 'm3', 'm4']);
         const cleanedMessages = (parsed.messages || []).filter(
@@ -33,12 +37,19 @@ export default function App() {
             m.author !== 'La banda dell\'estate' &&
             m.author !== 'Un caro amico'
         );
-        // If no message left or no Elisabetta message, ensure default Elisabetta message is present
         if (cleanedMessages.length === 0) {
           cleanedMessages.push(...DEFAULT_CONFIG.messages);
         }
+        const loadedPhotos =
+          parsed.photos && parsed.photos.length > 0
+            ? parsed.photos
+            : DEFAULT_CONFIG.photos;
+
         return {
           ...parsed,
+          personName: parsed.personName || DEFAULT_CONFIG.personName,
+          customSongUrl: parsed.customSongUrl || DEFAULT_CONFIG.customSongUrl,
+          photos: loadedPhotos,
           messages: cleanedMessages,
         };
       }
@@ -118,6 +129,7 @@ export default function App() {
         {/* Sezione 4 — La Canzone */}
         <SongSection
           customSongTitle={config.customSongTitle}
+          customSongUrl={config.customSongUrl}
           personName={config.personName}
         />
 

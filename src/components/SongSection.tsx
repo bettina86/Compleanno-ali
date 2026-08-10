@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Play, Pause, Volume2, VolumeX, Music, Disc, Sparkles } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Music, Sparkles, ExternalLink, Radio } from 'lucide-react';
 import { globalAudioSynth } from '../utils/audioSynth';
 import { triggerConfettiBurst } from '../utils/confetti';
 
 interface SongSectionProps {
   customSongTitle?: string;
+  customSongUrl?: string;
   personName: string;
 }
 
 export const SongSection: React.FC<SongSectionProps> = ({
   customSongTitle = 'La canzone dei 40 (Summer Birthday Mix)',
+  customSongUrl,
   personName,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(60);
+
+  // Detect Suno song link
+  const sunoMatch = customSongUrl?.match(/suno\.com\/(?:s|song|embed)\/([a-zA-Z0-9_-]+)/i);
+  const sunoId = sunoMatch ? sunoMatch[1] : null;
 
   useEffect(() => {
     globalAudioSynth.setCallbacks(
@@ -68,10 +74,45 @@ export const SongSection: React.FC<SongSectionProps> = ({
 
         <p className="text-slate-900 font-black text-lg sm:text-2xl mb-10 flex items-center justify-center gap-2 drop-shadow-sm">
           <Sparkles className="w-5 h-5 text-amber-300" />
-          Premi play e alza il volume! 🔊
+          {sunoId ? 'Ascolta la canzone su Suno o attiva la musica festosa! 🔊' : 'Premi play e alza il volume! 🔊'}
         </p>
 
-        {/* Music Player Card */}
+        {/* Suno Embedded Player if Suno URL is present */}
+        {sunoId && (
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            className="mb-8 frosted-card border border-white/80 rounded-3xl p-6 shadow-2xl max-w-2xl mx-auto backdrop-blur-2xl text-left"
+          >
+            <div className="flex items-center justify-between mb-3 px-1">
+              <div className="flex items-center gap-2 font-black text-slate-900 text-sm sm:text-base">
+                <Radio className="w-5 h-5 text-pink-600 animate-pulse" />
+                <span>Brano Originale Suno AI ({customSongTitle})</span>
+              </div>
+              <a
+                href={customSongUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-black text-pink-600 hover:text-pink-700 flex items-center gap-1 hover:underline bg-pink-50 px-3 py-1.5 rounded-full border border-pink-200"
+              >
+                <span>Apri su Suno</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            <div className="w-full rounded-2xl overflow-hidden shadow-xl bg-slate-950 border border-slate-800">
+              <iframe
+                src={`https://suno.com/embed/${sunoId}`}
+                title="Suno Music Player"
+                className="w-full h-44 sm:h-48 border-0"
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen"
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Interactive Synth / Custom Audio Player */}
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
@@ -109,7 +150,7 @@ export const SongSection: React.FC<SongSectionProps> = ({
           {/* Song Details & Controls */}
           <div className="flex-1 w-full">
             <span className="text-xs font-black uppercase tracking-widest text-slate-900">
-              In riproduzione
+              {sunoId ? 'Sintetizzatore Estivo Festa' : 'In riproduzione'}
             </span>
             <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-1 leading-snug drop-shadow-sm">
               {customSongTitle}
@@ -156,11 +197,11 @@ export const SongSection: React.FC<SongSectionProps> = ({
               >
                 {isPlaying ? (
                   <>
-                    <Pause className="w-4 h-4" /> Pausa
+                    <Pause className="w-4 h-4" /> Pausa Audio
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4" /> Play Musica
+                    <Play className="w-4 h-4" /> Play Festoso
                   </>
                 )}
               </button>

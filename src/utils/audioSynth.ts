@@ -49,26 +49,30 @@ class BirthdaySongSynth {
 
   public async play() {
     if (this.customUrl && this.customUrl.trim() !== '') {
-      if (!this.customAudio) {
-        this.customAudio = new Audio(this.customUrl);
-        this.customAudio.volume = this.volume;
-        this.customAudio.onended = () => {
-          this.isPlaying = false;
-          this.onStateChange?.(false);
-        };
-        this.customAudio.ontimeupdate = () => {
-          if (this.customAudio && this.onTimeUpdate) {
-            this.onTimeUpdate(this.customAudio.currentTime, this.customAudio.duration || 60);
-          }
-        };
-      }
-      try {
-        await this.customAudio.play();
-        this.isPlaying = true;
-        this.onStateChange?.(true);
-        return;
-      } catch (err) {
-        console.warn('Custom audio play error, falling back to synth', err);
+      // Check if URL is an HTML webpage (e.g. Suno page) rather than a direct audio file (.mp3, .wav, cdn stream)
+      const isHtmlPage = /suno\.com\/(?:s|song)|youtube\.com|youtu\.be/i.test(this.customUrl);
+      if (!isHtmlPage) {
+        if (!this.customAudio) {
+          this.customAudio = new Audio(this.customUrl);
+          this.customAudio.volume = this.volume;
+          this.customAudio.onended = () => {
+            this.isPlaying = false;
+            this.onStateChange?.(false);
+          };
+          this.customAudio.ontimeupdate = () => {
+            if (this.customAudio && this.onTimeUpdate) {
+              this.onTimeUpdate(this.customAudio.currentTime, this.customAudio.duration || 60);
+            }
+          };
+        }
+        try {
+          await this.customAudio.play();
+          this.isPlaying = true;
+          this.onStateChange?.(true);
+          return;
+        } catch (err) {
+          console.warn('Custom audio play error, falling back to synth', err);
+        }
       }
     }
 

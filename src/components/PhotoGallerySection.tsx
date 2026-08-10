@@ -47,9 +47,15 @@ export const PhotoGallerySection: React.FC<PhotoGallerySectionProps> = ({
               <div className="overflow-hidden rounded-xl bg-slate-100 aspect-4/3 relative">
                 <img
                   src={photo.url}
-                  alt={photo.caption}
+                  alt={photo.caption || 'Foto di compleanno'}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108"
                   loading="lazy"
+                  onError={(e) => {
+                    // Fallback to warm festive gradient placeholder if image fails to load
+                    const target = e.currentTarget;
+                    target.onerror = null;
+                    target.src = 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80';
+                  }}
                 />
                 <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <div className="w-12 h-12 rounded-full bg-white/90 text-slate-900 flex items-center justify-center shadow-lg transform scale-75 group-hover:scale-100 transition-transform">

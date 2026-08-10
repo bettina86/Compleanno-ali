@@ -38,6 +38,16 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
   const [editYear, setEditYear] = useState('');
   const [editLocation, setEditLocation] = useState('');
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setPersonName(config.personName);
+      setSongTitle(config.customSongTitle);
+      setSongUrl(config.customSongUrl || '');
+      setPhotos(config.photos || []);
+      setMessages(config.messages || []);
+    }
+  }, [isOpen, config]);
+
   if (!isOpen) return null;
 
   const handleAddPhoto = () => {
@@ -542,13 +552,31 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
           </div>
 
           {/* Footer Controls */}
-          <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-            <button
-              onClick={onResetDefaults}
-              className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-200 transition-colors"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> Ripristina Valori Iniziali
-            </button>
+          <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onResetDefaults}
+                className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-200 transition-colors"
+                title="Ripristina alle impostazioni predefinite"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Reset
+              </button>
+              <button
+                onClick={() => {
+                  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ personName, customSongTitle: songTitle, customSongUrl: songUrl, photos, messages }, null, 2));
+                  const downloadAnchor = document.createElement('a');
+                  downloadAnchor.setAttribute("href", dataStr);
+                  downloadAnchor.setAttribute("download", `compleanno-config-backup.json`);
+                  document.body.appendChild(downloadAnchor);
+                  downloadAnchor.click();
+                  downloadAnchor.remove();
+                }}
+                className="text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors border border-indigo-200"
+                title="Scarica i dati delle foto e messaggi in un file per il backup"
+              >
+                <Download className="w-3.5 h-3.5" /> Esporta Backup
+              </button>
+            </div>
 
             <div className="flex items-center gap-2">
               <button
