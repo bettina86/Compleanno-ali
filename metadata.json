@@ -1,0 +1,6 @@
+{
+  "name": "40 ANNI — Special Edition",
+  "description": "Sito web interattivo e responsive per il 40° compleanno (10 Agosto 1986 - 10 Agosto 2026)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
