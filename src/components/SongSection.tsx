@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Play, Pause, Volume2, VolumeX, Music, Sparkles, ExternalLink, Radio } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Music, Sparkles, ExternalLink } from 'lucide-react';
 import { globalAudioSynth } from '../utils/audioSynth';
 import { triggerConfettiBurst } from '../utils/confetti';
 
@@ -11,7 +11,7 @@ interface SongSectionProps {
 }
 
 export const SongSection: React.FC<SongSectionProps> = ({
-  customSongTitle = 'La canzone dei 40 (Summer Birthday Mix)',
+  customSongTitle = 'Buon compleanno!',
   customSongUrl,
   personName,
 }) => {
@@ -19,10 +19,6 @@ export const SongSection: React.FC<SongSectionProps> = ({
   const [volume, setVolume] = useState(0.8);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(60);
-
-  // Detect Suno song link
-  const sunoMatch = customSongUrl?.match(/suno\.com\/(?:s|song|embed)\/([a-zA-Z0-9_-]+)/i);
-  const sunoId = sunoMatch ? sunoMatch[1] : null;
 
   useEffect(() => {
     globalAudioSynth.setCallbacks(
@@ -56,173 +52,119 @@ export const SongSection: React.FC<SongSectionProps> = ({
   return (
     <section id="canzone" className="py-24 px-4 sm:px-6 relative bg-transparent text-slate-900 overflow-hidden">
       {/* Background Decorative Sound Waves */}
-      <div className="absolute inset-0 opacity-30 pointer-events-none flex items-center justify-center">
+      <div className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center">
         <div className="w-[600px] h-[600px] rounded-full border border-white/40 animate-ping" />
         <div className="w-[400px] h-[400px] rounded-full border border-white/60 animate-pulse" />
       </div>
 
       <div className="max-w-4xl mx-auto relative z-10 text-center">
         {/* Badge Header */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full frosted-pill text-slate-900 font-extrabold text-xs uppercase tracking-wider mb-4 border border-white/60">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full frosted-pill text-slate-900 font-extrabold text-xs uppercase tracking-wider mb-4 border border-white/60 shadow-sm">
           <Music className="w-4 h-4 text-amber-900" />
-          Colonna Sonora Ufficiale
+          Musica Speciale
         </div>
 
         <h2 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight mb-2 drop-shadow-sm">
-          La canzone dei 40 🎶
+          Buon compleanno! 🎶
         </h2>
 
-        <p className="text-slate-900 font-black text-lg sm:text-2xl mb-10 flex items-center justify-center gap-2 drop-shadow-sm">
+        <p className="text-slate-900 font-black text-lg sm:text-xl mb-8 flex items-center justify-center gap-2 drop-shadow-sm">
           <Sparkles className="w-5 h-5 text-amber-300" />
-          {sunoId ? 'Ascolta la canzone su Suno o attiva la musica festosa! 🔊' : 'Premi play e alza il volume! 🔊'}
+          Premi play per ascoltare la canzone! 🔊
         </p>
 
-        {/* Suno Embedded Player if Suno URL is present */}
-        {sunoId && (
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            className="mb-8 frosted-card border border-white/80 rounded-3xl p-6 shadow-2xl max-w-2xl mx-auto backdrop-blur-2xl text-left"
-          >
-            <div className="flex items-center justify-between mb-3 px-1">
-              <div className="flex items-center gap-2 font-black text-slate-900 text-sm sm:text-base">
-                <Radio className="w-5 h-5 text-pink-600 animate-pulse" />
-                <span>Brano Originale Suno AI ({customSongTitle})</span>
-              </div>
-              <a
-                href={customSongUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-black text-pink-600 hover:text-pink-700 flex items-center gap-1 hover:underline bg-pink-50 px-3 py-1.5 rounded-full border border-pink-200"
-              >
-                <span>Apri su Suno</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            </div>
-
-            <div className="w-full rounded-2xl overflow-hidden shadow-xl bg-slate-950 border border-slate-800">
-              <iframe
-                src={`https://suno.com/embed/${sunoId}`}
-                title="Suno Music Player"
-                className="w-full h-44 sm:h-48 border-0"
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen"
-              />
-            </div>
-          </motion.div>
-        )}
-
-        {/* Interactive Synth / Custom Audio Player */}
+        {/* Clean Audio Player Card */}
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
           viewport={{ once: true }}
-          className="frosted-card border border-white/70 rounded-3xl p-6 sm:p-10 shadow-2xl max-w-2xl mx-auto text-left flex flex-col md:flex-row items-center gap-8 backdrop-blur-2xl"
+          className="frosted-card border border-white/80 rounded-3xl p-6 sm:p-10 shadow-2xl max-w-xl mx-auto text-center backdrop-blur-2xl relative overflow-hidden"
         >
-          {/* Animated Spinning Vinyl Disk */}
-          <div className="relative shrink-0">
-            <div
-              className={`w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-slate-900 border-4 border-white/80 shadow-2xl flex items-center justify-center relative overflow-hidden transition-transform duration-1000 ${
-                isPlaying ? 'animate-spin' : ''
-              }`}
-              style={{ animationDuration: '6s' }}
-            >
-              {/* Vinyl Groove Rings */}
-              <div className="absolute inset-2 rounded-full border border-slate-800" />
-              <div className="absolute inset-6 rounded-full border border-slate-800" />
-              <div className="absolute inset-10 rounded-full border border-slate-800" />
-              
-              {/* Center Vinyl Label */}
-              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-400 to-pink-500 flex items-center justify-center text-slate-950 font-black text-xs shadow-inner">
-                40
-              </div>
-            </div>
-
-            {/* Play Badge Overlay */}
+          {/* Main Big Play / Pause Button */}
+          <div className="flex justify-center mb-6">
             <button
               onClick={handleTogglePlay}
-              className="absolute -bottom-2 -right-2 w-12 h-12 rounded-full frosted-button text-slate-900 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 cursor-pointer border border-white/80"
+              aria-label={isPlaying ? 'Pausa' : 'Riproduci canzone'}
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-tr from-amber-400 via-amber-300 to-pink-400 text-slate-950 flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-108 active:scale-95 cursor-pointer border-4 border-white group relative"
             >
-              {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
+              <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-25 group-hover:opacity-40" />
+              {isPlaying ? (
+                <Pause className="w-12 h-12 sm:w-14 sm:h-14 fill-current drop-shadow" />
+              ) : (
+                <Play className="w-12 h-12 sm:w-14 sm:h-14 fill-current ml-1.5 drop-shadow" />
+              )}
             </button>
           </div>
 
-          {/* Song Details & Controls */}
-          <div className="flex-1 w-full">
-            <span className="text-xs font-black uppercase tracking-widest text-slate-900">
-              {sunoId ? 'Sintetizzatore Estivo Festa' : 'In riproduzione'}
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-1 leading-snug drop-shadow-sm">
-              {customSongTitle}
-            </h3>
-            <p className="text-sm font-bold text-slate-800 mt-1">
-              Dedicata a {personName} per i suoi fantastici 40 anni! 🎂
-            </p>
+          <h3 className="text-2xl sm:text-3xl font-black text-slate-900 leading-snug drop-shadow-sm mb-1">
+            Buon compleanno!
+          </h3>
+          <p className="text-sm sm:text-base font-extrabold text-slate-800 mb-6">
+            Dedicata ad {personName} per i suoi fantastici 40 anni! 🎂🎉
+          </p>
 
-            {/* Equalizer Bars Animation */}
-            <div className="flex items-end gap-1.5 h-8 my-4">
-              {[...Array(16)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-full bg-slate-900 rounded-t-sm transition-all ${
-                    isPlaying ? 'animate-pulse' : 'h-1 opacity-40'
-                  }`}
-                  style={{
-                    height: isPlaying ? `${Math.max(15, (i * 17) % 100)}%` : '4px',
-                    animationDelay: `${(i % 5) * 0.15}s`,
-                  }}
-                />
-              ))}
+          {/* Equalizer Bars Animation */}
+          <div className="flex items-end justify-center gap-1.5 h-10 my-4 max-w-md mx-auto px-4">
+            {[...Array(20)].map((_, i) => (
+              <div
+                key={i}
+                className={`w-full bg-slate-900 rounded-t-sm transition-all ${
+                  isPlaying ? 'animate-pulse' : 'h-1.5 opacity-30'
+                }`}
+                style={{
+                  height: isPlaying ? `${Math.max(20, (i * 19 + 25) % 100)}%` : '6px',
+                  animationDelay: `${(i % 6) * 0.12}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Timeline Bar */}
+          <div className="w-full max-w-md mx-auto mt-4">
+            <div className="w-full h-2.5 bg-white/50 rounded-full overflow-hidden border border-white/60">
+              <div
+                className="h-full bg-slate-900 transition-all duration-300"
+                style={{ width: `${(progress / duration) * 100}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between text-xs text-slate-900 mt-1.5 font-black">
+              <span>{formatTime(progress)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+          </div>
+
+          {/* Bottom Volume & External Link controls */}
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-900/10 max-w-md mx-auto">
+            {/* Volume Slider */}
+            <div className="flex items-center gap-2 text-slate-900 font-extrabold text-xs">
+              {volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={volume}
+                onChange={handleVolumeChange}
+                className="w-24 accent-slate-900 cursor-pointer"
+              />
             </div>
 
-            {/* Timeline Bar */}
-            <div className="w-full">
-              <div className="w-full h-2 bg-white/40 rounded-full overflow-hidden border border-white/50">
-                <div
-                  className="h-full bg-slate-900 transition-all duration-300"
-                  style={{ width: `${(progress / duration) * 100}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between text-xs text-slate-900 mt-1 font-extrabold">
-                <span>{formatTime(progress)}</span>
-                <span>{formatTime(duration)}</span>
-              </div>
-            </div>
-
-            {/* Controls Bar */}
-            <div className="flex items-center justify-between mt-4">
-              <button
-                onClick={handleTogglePlay}
-                className="px-5 py-2.5 rounded-full frosted-button text-slate-900 font-extrabold text-xs sm:text-sm shadow-md border border-white/70 flex items-center gap-2"
+            {/* Optional link to Suno page if URL present */}
+            {customSongUrl && (
+              <a
+                href={customSongUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-black text-slate-900 hover:text-pink-600 flex items-center gap-1 bg-white/60 hover:bg-white px-3 py-1.5 rounded-full border border-white/80 transition-colors shadow-sm"
               >
-                {isPlaying ? (
-                  <>
-                    <Pause className="w-4 h-4" /> Pausa Audio
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" /> Play Festoso
-                  </>
-                )}
-              </button>
-
-              {/* Volume Slider */}
-              <div className="flex items-center gap-2 text-slate-900 font-bold">
-                {volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={volume}
-                  onChange={handleVolumeChange}
-                  className="w-20 accent-slate-900 cursor-pointer"
-                />
-              </div>
-            </div>
+                <span>Apri link brano</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
           </div>
         </motion.div>
       </div>
     </section>
   );
 };
+
