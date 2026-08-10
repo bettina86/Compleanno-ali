@@ -55,7 +55,7 @@ export const DEFAULT_TIMELINE: TimelineItem[] = [
     year: '1996',
     title: 'Primi ricordi 🎒',
     tagline: 'Anni \'90 d\'oro',
-    description: 'Game Boy, Walkman, biciclettate fino a sera, prime grandi amicizie e pomeriggi a giocare all\'aria aperta.',
+    description: 'Game Boy, Walkman, primi pc, ascolto di musica, prime grandi amicizie e pomeriggi a giocare all\'aria aperta.',
     iconName: 'Smile',
     color: 'from-pink-500 to-rose-500',
     badge: 'Anni \'90',
