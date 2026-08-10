@@ -1,5 +1,5 @@
-// Web Audio Synthesizer for "La Canzone dei 40"
-// Produces a bright, festive summer birthday tune with upbeat tempo, bassline, and chime chords.
+// Web Audio Synthesizer for "Tanti Auguri a Te" (Happy Birthday)
+// Produces a warm, classic music-box melody with gentle harmonies.
 
 class BirthdaySongSynth {
   private audioCtx: AudioContext | null = null;
@@ -12,23 +12,31 @@ class BirthdaySongSynth {
   private onTimeUpdate: ((currentTime: number, duration: number) => void) | null = null;
   private customUrl: string = '';
 
-  // Happy Birthday + Summer Pop Synth Melody sequence
-  // Frequencies in Hz
+  // Standard "Tanti Auguri a Te" melody in C major (Hz)
   private melodyNotes = [
-    261.63, 261.63, 293.66, 261.63, 349.23, 329.63, // Happy birthday to you
-    261.63, 261.63, 293.66, 261.63, 392.00, 349.23, // Happy birthday to you
-    261.63, 261.63, 523.25, 440.00, 349.23, 329.63, 293.66, // Happy birthday dear 40
-    466.16, 466.16, 440.00, 349.23, 392.00, 349.23, // Happy birthday to you!
-    // Summer Pop Bridge
-    349.23, 392.00, 440.00, 523.25, 587.33, 523.25, 440.00, 392.00,
+    // Phrase 1: "Tanti auguri a te"
+    392.00, 392.00, 440.00, 392.00, 523.25, 493.88,
+    // Phrase 2: "Tanti auguri a te"
+    392.00, 392.00, 440.00, 392.00, 587.33, 523.25,
+    // Phrase 3: "Tanti auguri felici"
+    392.00, 392.00, 783.99, 659.25, 523.25, 493.88, 440.00,
+    // Phrase 4: "Tanti auguri a te!"
+    698.46, 698.46, 659.25, 523.25, 587.33, 523.25,
+  ];
+
+  // Harmonies (Chords for music box feel)
+  private chordNotes = [
+    [261.63, 329.63], [261.63, 329.63], [261.63, 329.63], [261.63, 329.63], [261.63, 329.63], [293.66, 392.00],
+    [293.66, 392.00], [293.66, 392.00], [293.66, 392.00], [293.66, 392.00], [293.66, 392.00], [261.63, 329.63],
+    [261.63, 329.63], [261.63, 329.63], [349.23, 440.00], [349.23, 440.00], [261.63, 329.63], [261.63, 329.63], [349.23, 440.00],
+    [349.23, 440.00], [349.23, 440.00], [261.63, 329.63], [261.63, 329.63], [293.66, 392.00], [261.63, 329.63],
   ];
 
   private noteDurations = [
-    0.3, 0.3, 0.6, 0.6, 0.6, 1.2,
-    0.3, 0.3, 0.6, 0.6, 0.6, 1.2,
-    0.3, 0.3, 0.6, 0.6, 0.6, 0.6, 1.2,
-    0.3, 0.3, 0.6, 0.6, 0.6, 1.2,
-    0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.8,
+    0.35, 0.25, 0.6, 0.6, 0.6, 1.2,
+    0.35, 0.25, 0.6, 0.6, 0.6, 1.2,
+    0.35, 0.25, 0.6, 0.6, 0.6, 0.6, 1.2,
+    0.35, 0.25, 0.6, 0.6, 0.6, 1.5,
   ];
 
   public setCallbacks(
@@ -40,45 +48,74 @@ class BirthdaySongSynth {
   }
 
   public setCustomUrl(url: string) {
-    this.customUrl = url;
-    if (this.customAudio) {
-      this.customAudio.pause();
-      this.customAudio = null;
+    if (this.customUrl !== url) {
+      if (this.isPlaying) {
+        this.pause();
+      }
+      this.customUrl = url;
+      if (this.customAudio) {
+        this.customAudio.pause();
+        this.customAudio = null;
+      }
     }
   }
 
   public async play() {
     if (this.customUrl && this.customUrl.trim() !== '') {
-      // Check if URL is an HTML webpage (e.g. Suno page) rather than a direct audio file (.mp3, .wav, cdn stream)
-      const isHtmlPage = /suno\.com\/(?:s|song)|youtube\.com|youtu\.be/i.test(this.customUrl);
-      if (!isHtmlPage) {
-        if (!this.customAudio) {
-          this.customAudio = new Audio(this.customUrl);
-          this.customAudio.volume = this.volume;
-          this.customAudio.onended = () => {
-            this.isPlaying = false;
-            this.onStateChange?.(false);
-          };
-          this.customAudio.ontimeupdate = () => {
-            if (this.customAudio && this.onTimeUpdate) {
-              this.onTimeUpdate(this.customAudio.currentTime, this.customAudio.duration || 60);
-            }
-          };
+      let playableUrl = this.customUrl.trim();
+
+      // If Suno link passed, attempt audio stream
+      const sunoMatch = playableUrl.match(/suno\.com\/(?:s|song|embed)\/([a-zA-Z0-9_-]+)/i);
+      if (sunoMatch) {
+        const id = sunoMatch[1];
+        playableUrl = `https://cdn1.suno.ai/${id}.mp3`;
+      }
+
+      if (!this.customAudio || this.customAudio.src !== playableUrl) {
+        if (this.customAudio) {
+          this.customAudio.pause();
         }
-        try {
-          await this.customAudio.play();
-          this.isPlaying = true;
-          this.onStateChange?.(true);
-          return;
-        } catch (err) {
-          console.warn('Custom audio play error, falling back to synth', err);
-        }
+        this.customAudio = new Audio(playableUrl);
+        this.customAudio.volume = this.volume;
+        this.customAudio.onended = () => {
+          this.isPlaying = false;
+          this.onStateChange?.(false);
+        };
+        this.customAudio.ontimeupdate = () => {
+          if (this.customAudio && this.onTimeUpdate) {
+            this.onTimeUpdate(
+              this.customAudio.currentTime,
+              this.customAudio.duration || 60
+            );
+          }
+        };
+        this.customAudio.onerror = () => {
+          console.warn('Audio URL failed to load, falling back to birthday music box');
+          this.playSynthFallback();
+        };
+      }
+
+      try {
+        await this.customAudio.play();
+        this.isPlaying = true;
+        this.onStateChange?.(true);
+        return;
+      } catch (err) {
+        console.warn('Custom audio playback error, launching music box', err);
+        this.playSynthFallback();
+        return;
       }
     }
 
-    // Synth fallback / native audio synth
+    this.playSynthFallback();
+  }
+
+  private async playSynthFallback() {
     if (!this.audioCtx) {
-      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtxClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
       this.audioCtx = new AudioCtxClass();
     }
 
@@ -127,13 +164,17 @@ class BirthdaySongSynth {
 
     const freq = this.melodyNotes[this.currentStep];
     const dur = this.noteDurations[this.currentStep] || 0.5;
+    const chord = this.chordNotes[this.currentStep] || [];
 
-    // Play chime sound
-    this.playTone(freq, dur);
-    // Play warm bass root
-    this.playBassTone(freq / 2, dur);
+    // Main music box chime
+    this.playChime(freq, dur, 0.3);
 
-    // Notify time update
+    // Subtle chord harmony
+    chord.forEach((cNote) => {
+      this.playChime(cNote, dur, 0.1);
+    });
+
+    // Notify progress
     const totalDuration = this.noteDurations.reduce((a, b) => a + b, 0);
     const elapsed = this.noteDurations.slice(0, this.currentStep).reduce((a, b) => a + b, 0);
     this.onTimeUpdate?.(elapsed, totalDuration);
@@ -145,47 +186,29 @@ class BirthdaySongSynth {
     }, dur * 1000);
   }
 
-  private playTone(freq: number, duration: number) {
+  private playChime(freq: number, duration: number, gainLevel: number) {
     if (!this.audioCtx) return;
 
     const osc = this.audioCtx.createOscillator();
     const gain = this.audioCtx.createGain();
 
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
-
-    const now = this.audioCtx.currentTime;
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.25 * this.volume, now + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-    osc.connect(gain);
-    gain.connect(this.audioCtx.destination);
-
-    osc.start(now);
-    osc.stop(now + duration);
-  }
-
-  private playBassTone(freq: number, duration: number) {
-    if (!this.audioCtx) return;
-
-    const osc = this.audioCtx.createOscillator();
-    const gain = this.audioCtx.createGain();
-
+    // Pure bell / music box tone
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
 
     const now = this.audioCtx.currentTime;
     gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.15 * this.volume, now + 0.08);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.9);
+    gain.gain.linearRampToValueAtTime(gainLevel * this.volume, now + 0.02);
+    // Exponential ring-down
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration * 1.5);
 
     osc.connect(gain);
     gain.connect(this.audioCtx.destination);
 
     osc.start(now);
-    osc.stop(now + duration);
+    osc.stop(now + duration * 1.5);
   }
 }
 
 export const globalAudioSynth = new BirthdaySongSynth();
+

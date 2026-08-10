@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { FortyThing } from '../types';
-import { Sparkles, CheckCircle2, Trophy, Flame } from 'lucide-react';
+import { Sparkles, CheckCircle2, Trophy, Flame, PartyPopper, X, Award } from 'lucide-react';
 import { triggerConfettiBurst, triggerFloatingEmoji } from '../utils/confetti';
 
 interface FortyThingsSectionProps {
@@ -10,6 +10,7 @@ interface FortyThingsSectionProps {
 
 export const FortyThingsSection: React.FC<FortyThingsSectionProps> = ({ items }) => {
   const [checkedIds, setCheckedIds] = useState<number[]>([]);
+  const [showRewardModal, setShowRewardModal] = useState(false);
 
   const handleToggleItem = (item: FortyThing, e: React.MouseEvent<HTMLDivElement>) => {
     const isChecked = checkedIds.includes(item.id);
@@ -22,12 +23,23 @@ export const FortyThingsSection: React.FC<FortyThingsSectionProps> = ({ items })
       triggerFloatingEmoji(item.icon, e.clientX, e.clientY);
 
       // If all 40 checked, celebrate!
-      if (newChecked.length === 40) {
+      if (newChecked.length === items.length) {
         triggerConfettiBurst();
+        setShowRewardModal(true);
       }
     }
 
     setCheckedIds(newChecked);
+  };
+
+  const handleSelectAll = () => {
+    if (checkedIds.length === items.length) {
+      setCheckedIds([]);
+    } else {
+      setCheckedIds(items.map((i) => i.id));
+      triggerConfettiBurst();
+      setShowRewardModal(true);
+    }
   };
 
   const progressPercent = Math.round((checkedIds.length / items.length) * 100);
@@ -45,7 +57,7 @@ export const FortyThingsSection: React.FC<FortyThingsSectionProps> = ({ items })
             40 cose da festeggiare 🥂
           </h2>
           <p className="text-slate-900 font-bold text-lg mt-3 max-w-xl mx-auto">
-            Clicca sugli elementi per celebrarli uno ad uno e sbloccare la festa finale!
+            Clicca sugli elementi per celebrarli uno ad uno e sbloccare il trofeo finale!
           </p>
 
           {/* Progress Tracker Bar */}
@@ -56,7 +68,7 @@ export const FortyThingsSection: React.FC<FortyThingsSectionProps> = ({ items })
                 Progresso Celebrazione
               </span>
               <span className="text-slate-900 font-black text-sm">
-                {checkedIds.length} / 40 ({progressPercent}%)
+                {checkedIds.length} / {items.length} ({progressPercent}%)
               </span>
             </div>
             <div className="w-full h-3 bg-white/40 rounded-full overflow-hidden border border-white/50">
@@ -65,11 +77,27 @@ export const FortyThingsSection: React.FC<FortyThingsSectionProps> = ({ items })
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            {checkedIds.length === 40 && (
-              <p className="text-xs font-black text-emerald-950 mt-2 animate-bounce">
-                🎉 HAI SBLOCCATO TUTTI E 40 I MOTIVI PER FESTEGGIARE! FANTASTICO!
-              </p>
-            )}
+
+            <div className="flex items-center justify-between mt-3">
+              <button
+                onClick={handleSelectAll}
+                className="text-xs font-black text-slate-900 hover:text-amber-900 bg-white/60 hover:bg-white px-3 py-1 rounded-full border border-white/80 transition-all cursor-pointer shadow-sm"
+              >
+                {checkedIds.length === items.length ? 'Deseleziona tutti' : 'Seleziona tutti ✨'}
+              </button>
+
+              {checkedIds.length === items.length && (
+                <button
+                  onClick={() => {
+                    triggerConfettiBurst();
+                    setShowRewardModal(true);
+                  }}
+                  className="text-xs font-black text-emerald-950 bg-emerald-200 hover:bg-emerald-300 px-3 py-1 rounded-full border border-emerald-300 transition-all cursor-pointer animate-pulse"
+                >
+                  🏆 Apri Trofeo!
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -146,6 +174,54 @@ export const FortyThingsSection: React.FC<FortyThingsSectionProps> = ({ items })
           })}
         </div>
       </div>
+
+      {/* 40/40 Celebration Reward Modal */}
+      <AnimatePresence>
+        {showRewardModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              className="bg-gradient-to-br from-amber-100 via-white to-pink-100 border-4 border-amber-300 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center relative overflow-hidden"
+            >
+              <button
+                onClick={() => setShowRewardModal(false)}
+                className="absolute top-4 right-4 text-slate-600 hover:text-slate-900 p-2 rounded-full bg-white/80 hover:bg-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-400 to-pink-500 text-slate-950 mx-auto flex items-center justify-center shadow-xl mb-4 border-4 border-white animate-bounce">
+                <Trophy className="w-10 h-10 fill-current" />
+              </div>
+
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-200 text-amber-950 font-black text-xs uppercase tracking-wider mb-2">
+                <Award className="w-4 h-4" /> Trofeo Sbloccato!
+              </span>
+
+              <h3 className="text-3xl font-black text-slate-900 leading-tight mb-2">
+                Campione/ssa dei 40 Anni! 👑
+              </h3>
+
+              <p className="text-slate-800 font-bold text-sm leading-relaxed mb-6">
+                Hai spuntato tutti i 40 traguardi e ricordi speciali! Sei ufficialmente la leggenda di questa giornata indimenticabile! 🥂🎉
+              </p>
+
+              <button
+                onClick={() => {
+                  triggerConfettiBurst();
+                  setShowRewardModal(false);
+                }}
+                className="w-full py-3 px-6 rounded-2xl bg-slate-900 text-white font-black text-base shadow-lg hover:bg-slate-800 transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <PartyPopper className="w-5 h-5 text-amber-400" />
+                Festeggia ancora! 🎉
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

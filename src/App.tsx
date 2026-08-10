@@ -131,6 +131,13 @@ export default function App() {
           customSongTitle={config.customSongTitle}
           customSongUrl={config.customSongUrl}
           personName={config.personName}
+          onUpdateSong={(title, url) =>
+            setConfig((prev) => ({
+              ...prev,
+              customSongTitle: title,
+              customSongUrl: url,
+            }))
+          }
         />
 
         {/* Sezione 5 — Messaggi di Auguri */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Play, Pause, Volume2, VolumeX, Music, Sparkles, ExternalLink } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Music, Sparkles, Upload } from 'lucide-react';
 import { globalAudioSynth } from '../utils/audioSynth';
 import { triggerConfettiBurst } from '../utils/confetti';
 
@@ -8,12 +8,14 @@ interface SongSectionProps {
   customSongTitle?: string;
   customSongUrl?: string;
   personName: string;
+  onUpdateSong?: (title: string, url: string) => void;
 }
 
 export const SongSection: React.FC<SongSectionProps> = ({
   customSongTitle = 'Buon compleanno!',
   customSongUrl,
   personName,
+  onUpdateSong,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
@@ -29,6 +31,32 @@ export const SongSection: React.FC<SongSectionProps> = ({
       }
     );
   }, []);
+
+  // Sync custom URL to global synth
+  useEffect(() => {
+    if (customSongUrl) {
+      globalAudioSynth.setCustomUrl(customSongUrl);
+    } else {
+      globalAudioSynth.setCustomUrl('');
+    }
+  }, [customSongUrl]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        if (base64) {
+          const songName = file.name.replace(/\.[^/.]+$/, '');
+          onUpdateSong?.(songName, base64);
+          globalAudioSynth.setCustomUrl(base64);
+          triggerConfettiBurst();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleTogglePlay = () => {
     globalAudioSynth.togglePlay();
@@ -97,7 +125,7 @@ export const SongSection: React.FC<SongSectionProps> = ({
           </div>
 
           <h3 className="text-2xl sm:text-3xl font-black text-slate-900 leading-snug drop-shadow-sm mb-1">
-            Buon compleanno!
+            {customSongTitle || 'Buon compleanno!'}
           </h3>
           <p className="text-sm sm:text-base font-extrabold text-slate-800 mb-6">
             Dedicata ad {personName} per i suoi fantastici 40 anni! 🎂🎉
@@ -133,9 +161,8 @@ export const SongSection: React.FC<SongSectionProps> = ({
             </div>
           </div>
 
-          {/* Bottom Volume & External Link controls */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-900/10 max-w-md mx-auto">
-            {/* Volume Slider */}
+          {/* Bottom Volume Controls & MP3 File Uploader */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-6 pt-4 border-t border-slate-900/10 max-w-md mx-auto">
             <div className="flex items-center gap-2 text-slate-900 font-extrabold text-xs">
               {volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               <input
@@ -145,26 +172,29 @@ export const SongSection: React.FC<SongSectionProps> = ({
                 step="0.05"
                 value={volume}
                 onChange={handleVolumeChange}
-                className="w-24 accent-slate-900 cursor-pointer"
+                className="w-20 sm:w-24 accent-slate-900 cursor-pointer"
               />
             </div>
 
-            {/* Optional link to Suno page if URL present */}
-            {customSongUrl && (
-              <a
-                href={customSongUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-black text-slate-900 hover:text-pink-600 flex items-center gap-1 bg-white/60 hover:bg-white px-3 py-1.5 rounded-full border border-white/80 transition-colors shadow-sm"
-              >
-                <span>Apri link brano</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            )}
+            <label
+              htmlFor="song-file-input"
+              className="text-xs font-black text-slate-900 hover:text-slate-950 flex items-center gap-1.5 bg-white/80 hover:bg-white px-3.5 py-1.5 rounded-full border border-white/90 transition-all shadow-sm cursor-pointer"
+            >
+              <Upload className="w-3.5 h-3.5 text-slate-900" />
+              <span>Carica file MP3</span>
+              <input
+                id="song-file-input"
+                type="file"
+                accept="audio/*, .mp3, .wav, .m4a"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </label>
           </div>
         </motion.div>
       </div>
     </section>
   );
 };
+
 

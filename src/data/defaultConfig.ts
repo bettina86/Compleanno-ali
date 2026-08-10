@@ -137,8 +137,8 @@ export const DEFAULT_CONFIG: BirthdayConfig = {
   birthDate: '1986-08-10',
   targetDate: '2026-08-10',
   tagline: '40 ANNI — SPECIAL EDITION',
-  customSongTitle: 'La Canzone dei 40 (Summer Birthday Mix)',
-  customSongUrl: 'https://suno.com/s/oMdLktFiCI6c7mCi',
+  customSongTitle: 'Canzone di Buon Compleanno 🎂',
+  customSongUrl: '',
   themeColors: {
     primary: '#FFC72C',
     secondary: '#FF5964',

@@ -503,19 +503,55 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-slate-800 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none"
                   />
                 </div>
+
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    URL File MP3 Personalizzato (Opzionale)
+                    Carica File MP3 dal Computer
+                  </label>
+                  <input
+                    type="file"
+                    accept="audio/*, .mp3, .wav, .m4a"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const base64 = event.target?.result as string;
+                          if (base64) {
+                            setSongUrl(base64);
+                            if (!songTitle || songTitle === 'Buon compleanno!') {
+                              setSongTitle(file.name.replace(/\.[^/.]+$/, ''));
+                            }
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full text-xs font-semibold text-slate-600 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer border border-slate-200 rounded-xl p-2 bg-slate-50"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Puoi caricare un qualsiasi file audio MP3 dal tuo dispositivo per farlo riprodurre direttamente nel sito.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    OPPURE Incolla URL File Audio MP3
                   </label>
                   <input
                     type="url"
-                    value={songUrl}
+                    value={songUrl.startsWith('data:audio') ? '' : songUrl}
                     onChange={(e) => setSongUrl(e.target.value)}
-                    placeholder="Se lasciato vuoto, verrà utilizzata la musica synth integrata"
+                    placeholder="Es. https://esempio.it/canzone.mp3"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-medium text-slate-800 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none"
                   />
+                  {songUrl.startsWith('data:audio') && (
+                    <p className="text-xs text-emerald-700 font-extrabold mt-1 flex items-center gap-1">
+                      ✓ File MP3 caricato in memoria!
+                    </p>
+                  )}
                   <p className="text-xs text-slate-500 mt-1">
-                    Di default la musica di compleanno estiva viene sintetizzata in tempo reale dal browser!
+                    Di default viene riprodotta la musica di compleanno integrata.
                   </p>
                 </div>
               </div>
